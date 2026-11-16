@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/roadmap-run-state.schema.json",
+  "title": "ForgeCycle roadmap run state",
+  "description": "State of one roadmap run, stored in .forgecycle/roadmap-runs/<roadmap-run-id>/state.json and replaced atomically (ADR 0026).",
+  "type": "object",
+  "required": [
+    "schema_version", "roadmap_run_id", "repository", "manifest_path", "base_revision",
+    "integration_branch", "integration_head", "source_branch", "source_head_at_start",
+    "policy", "auto_resume", "state", "tasks", "created_at", "updated_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "roadmap_run_id": { "type": "string", "minLength": 1 },
+    "repository": { "type": "string", "minLength": 1 },
+    "manifest_path": { "type": "string", "minLength": 1, "description": "The manifest the roadmap run started from; roadmap.json beside this file is its snapshot" },
+    "base_revision": { "type": "string", "minLength": 1 },
+    "integration_branch": { "type": "string", "pattern": "^forgecycle/roadmap/" },
+    "integration_head": { "type": "string", "minLength": 1, "description": "The commit the integration branch points at: the base, then each done task run's head_revision" },
+    "source_branch": { "type": "string", "minLength": 1 },
+    "source_head_at_start": { "type": "string", "minLength": 1 },
+    "policy": { "type": "string", "minLength": 1 },
+    "approval": { "enum": ["autonomous", "plan-and-final", "every-turn", "custom"], "description": "Passed to every task run; present only when the operator gave --approval" },
+    "auto_resume": { "type": "boolean", "description": "Passed to every task run and task resume child as --auto-resume (ADR 0025)" },
+    "state": { "enum": ["running", "stopped", "done", "failed", "abandoned"], "description": "A running roadmap run with no live process lock is reported as interrupted; that is computed, never stored" },
+    "current_task": { "type": "string", "pattern": "^FC[0-9]{2,}$" },
+    "reason": { "type": "string", "description": "Why the roadmap run stopped; cleared when it leaves stopped" },
+    "stop_kind": { "enum": ["task_run_stopped", "task_run_start_failed", "integration_blocked", "pause_requested"], "description": "Cleared when the roadmap run leaves stopped" },
+    "stop_detail": { "type": "string", "description": "The task run's stop_kind for task_run_stopped, the child's exit code for task_run_start_failed, or checked_out, moved, or not_descendant for integration_blocked; absent for pause_requested" },
+    "result": { "type": "string", "description": "result.md, written when the roadmap run finishes" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "status", "task_runs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^FC[0-9]{2,}$" },
+          "file": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pending", "running", "done", "skipped"] },
+          "task_runs": { "type": "array", "items": { "type": "string" }, "description": "Every task run of this task, oldest first; the last one is the current attempt" },
+          "base_revision": { "type": "string", "description": "The integration head the current attempt started on" },
+          "head_revision": { "type": "string", "description": "The integrated head of a done task" }
+        }
+      }
+    },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  },
+  "additionalProperties": true
+}

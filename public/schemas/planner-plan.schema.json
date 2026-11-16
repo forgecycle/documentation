@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/planner-plan.schema.json",
+  "title": "ForgeCycle Planner plan front matter",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "turn", "role", "status", "acceptance_criteria", "required_tests"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "planner_plan" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "turn": { "type": "integer", "minimum": 1 },
+    "role": { "const": "Planner" },
+    "status": { "enum": ["planned", "needs_human"] },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "summary"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^AC[0-9]+$" },
+          "summary": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "required_tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "command"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^T[0-9]+$" },
+          "command": { "type": "string", "minLength": 1 },
+          "after_gate": { "type": "boolean", "description": "The test reads a gate's output, so it runs only after the gates: Builder reports it not_run and Reviewer runs it. Not allowed on a gated test, and needs a gated required test (ADR 0037)" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

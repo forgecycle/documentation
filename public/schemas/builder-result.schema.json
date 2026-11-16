@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/builder-result.schema.json",
+  "title": "ForgeCycle Builder result front matter",
+  "description": "Describes the stored artifact. On input, ForgeCycle fills schema_version, run_id, turn, base_revision, head_revision, and each required test's command when omitted, expands abbreviated revisions, and rewrites equivalent required-test commands to the exact required string (ADR 0016, ADR 0018). Status completed requires every test passed, except that gated and after-gate tests may be not_run (ADR 0023, ADR 0037); failing or other not_run tests are reported under partial.",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "turn", "role", "status", "base_revision", "head_revision", "tests"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "builder_result" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "turn": { "type": "integer", "minimum": 1 },
+    "role": { "const": "Builder" },
+    "status": { "enum": ["completed", "partial", "blocked"], "description": "completed only when every test passed" },
+    "base_revision": { "type": "string", "minLength": 1 },
+    "head_revision": { "type": "string", "minLength": 1 },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "command", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^T[0-9]+$" },
+          "status": { "enum": ["passed", "failed", "not_run"] },
+          "command": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 },
+          "after_gate": { "type": "boolean", "description": "Ignored: the required test's definition decides; a test that runs after the gates may be not_run under completed (ADR 0037)" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/roadmap.schema.json",
+  "title": "ForgeCycle roadmap manifest (roadmap.json)",
+  "description": "The machine-readable roadmap that roadmap decompose writes and roadmap runs read. Array order is execution order; each task depends only on earlier tasks. Paths are relative to the manifest's directory.",
+  "type": "object",
+  "required": ["schema_version", "tasks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_plan": { "type": "string", "minLength": 1, "description": "Snapshot of the decomposed plan, relative to the manifest's directory" },
+    "decisions": { "type": "string", "pattern": "\\.md$", "description": "The decisions document, relative to the manifest's directory; it must resolve inside the repository. A roadmap run refuses to start while one of its decisions is open, and gives every task run the answers (ADR 0028)" },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "file", "depends_on"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^FC[0-9]{2,}$" },
+          "title": { "type": "string", "minLength": 1 },
+          "file": { "type": "string", "pattern": "\\.md$", "description": "The task file, relative to the manifest's directory; it must resolve inside the repository" },
+          "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^FC[0-9]{2,}$" }, "uniqueItems": true }
+        }
+      }
+    }
+  }
+}

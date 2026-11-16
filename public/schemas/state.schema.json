@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/state.schema.json",
+  "title": "ForgeCycle run state",
+  "type": "object",
+  "required": [
+    "schema_version", "run_id", "repository", "state", "phase", "turn",
+    "base_revision", "source_branch", "source_head_at_start", "branch", "worktree", "task_snapshot",
+    "policy", "approval_policy", "change_expected", "finding_history", "closed_findings",
+    "selected_candidates", "created_at", "updated_at"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "repository": { "type": "string", "minLength": 1 },
+    "state": {
+      "enum": ["planning", "awaiting_plan_approval", "building", "reviewing", "awaiting_final_approval", "paused", "blocked", "done", "failed", "abandoned"]
+    },
+    "phase": { "type": "string" },
+    "turn": { "type": "integer", "minimum": 0 },
+    "base_revision": { "type": "string" },
+    "source_branch": { "type": "string", "minLength": 1 },
+    "source_head_at_start": { "type": "string", "minLength": 1 },
+    "source_head_at_completion": { "type": "string", "minLength": 1 },
+    "source_branch_advanced": { "type": "boolean" },
+    "branch": { "type": "string" },
+    "worktree": { "type": "string" },
+    "task_snapshot": { "type": "string" },
+    "task_path": { "type": "string" },
+    "plan_path": { "type": "string" },
+    "policy": { "type": "string" },
+    "approval_explicit": { "type": "boolean" },
+    "checkpoints_explicit": { "type": "boolean" },
+    "approval_policy": { "enum": ["autonomous", "plan-and-final", "every-turn", "custom"] },
+    "approval_checkpoints": { "type": "array" },
+    "change_expected": { "type": "boolean" },
+    "finding_history": { "type": "array", "items": { "type": "string" }, "description": "One open-findings fingerprint (sorted open IDs joined with commas) per changes_requested review since findings last progressed" },
+    "closed_findings": { "type": "array", "items": { "type": "string" } },
+    "selected_candidates": { "type": "array" },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "reason": { "type": "string", "description": "Why the run is stopped; cleared when the run leaves the stopped state and at done" },
+    "resume_state": { "enum": ["planning", "building", "reviewing", "done"] },
+    "pause_kind": { "type": "string" },
+    "stop_kind": {
+      "enum": ["approval_gate", "needs_human", "technical_block", "no_progress", "agent_failure", "unaccepted_head", "read_only_mutation", "builder_invariant", "review_invariant", "gate_failure", "pause_requested"],
+      "description": "Stable classification of the current stop (ADR 0022); cleared with reason"
+    },
+    "stop_detail": { "type": "string", "description": "Refines stop_kind: the approval checkpoint of an approval_gate, the failure category of an agent_failure (quota_exhausted, rate_limited, timeout, unavailable, authentication_error, invocation_error, protocol_error, interrupted, worktree_mutated, config_error, mixed, unknown), or the cause of a gate_failure (interrupted, start_failed, worktree_mutated)" },
+    "last_head": { "type": "string" },
+    "unaccepted_head": { "type": "string", "description": "Builder commit whose handoff failed validation (ADR 0019)" },
+    "unaccepted_from": { "type": "string" },
+    "provisioned_files": { "type": "array", "items": { "type": "string" } },
+    "auto_resume_turn": { "type": "integer", "minimum": 0, "description": "Turn of the task run's last automatic resume under --auto-resume (ADR 0025); at most one automatic resume is allowed between two accepted handoffs" },
+    "auto_resumes": { "type": "integer", "minimum": 0, "description": "Number of automatic resumes over the task run's life (ADR 0025)" },
+    "roadmap_run_id": { "type": "string", "minLength": 1, "description": "The roadmap run that started this task run, from FORGECYCLE_ROADMAP_RUN_ID (ADR 0026)" },
+    "roadmap_task_id": { "type": "string", "pattern": "^FC[0-9]{2,}$", "description": "The roadmap task this task run runs, from FORGECYCLE_ROADMAP_TASK_ID (ADR 0026)" },
+    "roadmap_decisions": { "type": "string", "minLength": 1, "description": "The task run's copy of its roadmap run's decisions.md, taken when it started and named in every turn manifest as ROADMAP_DECISIONS (ADR 0028)" }
+  },
+  "additionalProperties": true
+}

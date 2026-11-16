@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/handoff-frontmatter.schema.json",
+  "title": "ForgeCycle handoff front matter",
+  "type": "object",
+  "required": ["schema_version", "kind", "run_id", "turn", "role"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "enum": ["planner_plan", "builder_result", "reviewer_review", "human_feedback"] },
+    "run_id": { "type": "string" },
+    "turn": { "type": "integer", "minimum": 1 },
+    "role": { "enum": ["Planner", "Builder", "Reviewer", "Human"] }
+  }
+}
+

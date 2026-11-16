@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/notification-log.schema.json",
+  "title": "ForgeCycle notification log record",
+  "description": "One line of <git-common-dir>/forgecycle/observability/notifications.ndjson, the history of runs that needed an operator (ADR 0027). The command that owns a run appends a raised record when it leaves the run stopped for an operator; the command whose state save clears the stop appends a resolved record. Readers fold records by key: the first raised and the first resolved record of a key win, and lines that do not parse are skipped.",
+  "type": "object",
+  "required": ["schema_version", "type", "at"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "type": { "enum": ["raised", "resolved"] },
+    "at": { "type": "string", "format": "date-time", "description": "raised: when the stop was written to the run's state (its updated_at); resolved: when the stop was cleared" },
+    "by": { "type": "string", "description": "The full name of the command that wrote the record, for example task run or task approve" },
+    "operation_id": { "type": "string", "description": "The writing command's operation in the journal" },
+    "item": {
+      "description": "raised only: the attention item, as GET /api/attention returns it. It never carries the stop reason.",
+      "type": "object",
+      "required": ["key", "kind", "id", "state", "stop_kind", "human"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1, "description": "<id>|<state>|<stop_kind>|<stop_detail>|<updated_at>; unique per stop" },
+        "kind": { "enum": ["task_run", "roadmap_run"] },
+        "id": { "type": "string", "minLength": 1 },
+        "task": { "type": "string" },
+        "state": { "type": "string" },
+        "stop_kind": { "type": "string", "minLength": 1 },
+        "stop_detail": { "type": "string" },
+        "next": { "type": "string", "description": "The stop report's first suggested command" },
+        "next_why": { "type": "string" },
+        "human": { "type": "boolean", "description": "The first suggested command needs a human decision" },
+        "roadmap_run_id": { "type": "string" },
+        "roadmap_task_id": { "type": "string" },
+        "since": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "late": { "type": "boolean", "description": "raised only: written by a later command than the one that stopped the run, such as for an interrupted run" },
+    "detected_at": { "type": "string", "format": "date-time", "description": "raised only, with late: when the stop was recorded" },
+    "id": { "type": "string", "description": "resolved only: the run" },
+    "key": { "type": "string", "description": "resolved only: the raised item's key" },
+    "outcome": { "type": "string", "description": "resolved only: the run's state after the resolving command, or deleted when forgecycle prune removed it" }
+  },
+  "additionalProperties": false
+}

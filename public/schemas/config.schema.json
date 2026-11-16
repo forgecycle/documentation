@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forgecycle.dev/schemas/config.schema.json",
+  "title": "ForgeCycle configuration",
+  "type": "object",
+  "required": ["schema_version", "default_policy", "default_approval", "adapters", "candidates", "policies"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "default_policy": { "type": "string" },
+    "default_approval": { "enum": ["autonomous", "plan-and-final", "every-turn", "custom"] },
+    "debug": { "type": "boolean" },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "checkpoints": {
+          "type": "array",
+          "items": { "enum": ["after_planning", "after_building", "after_reviewing", "final"] },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "adapters": {
+      "type": "object",
+      "properties": {
+        "opencode": { "$ref": "#/$defs/adapter" },
+        "codex": { "$ref": "#/$defs/adapter" },
+        "claude": { "$ref": "#/$defs/adapter" },
+        "agy": { "$ref": "#/$defs/agyAdapter" }
+      },
+      "additionalProperties": false
+    },
+    "candidates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["adapter", "model", "effort", "permission"],
+        "properties": {
+          "adapter": { "enum": ["opencode", "codex", "claude", "agy"] },
+          "model": { "type": "string" },
+          "effort": { "enum": ["low", "medium", "high"] },
+          "native_effort": { "type": "string", "minLength": 1 },
+          "permission": { "enum": ["read-only", "workspace-write", "unrestricted"] },
+          "timeout_seconds": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["decomposer", "planner", "builder", "reviewer"],
+        "properties": {
+          "decomposer": { "$ref": "#/$defs/candidateList" },
+          "planner": { "$ref": "#/$defs/candidateList" },
+          "builder": { "$ref": "#/$defs/candidateList" },
+          "reviewer": { "$ref": "#/$defs/candidateList" },
+          "retry_sweeps": { "type": "integer", "minimum": 0, "maximum": 10 },
+          "retry_backoff_seconds": { "type": "integer", "minimum": 0, "maximum": 3600 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+      }
+    },
+    "quota_cooldown_seconds": { "type": "integer", "minimum": 0, "maximum": 604800 },
+    "worktree": {
+      "type": "object",
+      "properties": {
+        "copy_ignored": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "lint": {
+      "type": "object",
+      "properties": {
+        "command_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "pattern", "applies_to", "message"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "pattern": { "type": "string", "minLength": 1 },
+              "applies_to": { "type": "array", "minItems": 1, "items": { "enum": ["plan", "review_added"] } },
+              "message": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "disabled_rules": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "evidence_reuse_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "gates": {
+          "type": "array",
+          "description": "Long-running required tests ForgeCycle runs itself before each review (ADR 0023)",
+          "items": {
+            "type": "object",
+            "required": ["id", "command"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$" },
+              "command": { "type": "string", "minLength": 1, "pattern": "^[^\\r\\n]*$" },
+              "timeout_seconds": { "type": "integer", "minimum": 0 },
+              "cleanup": { "type": "string", "pattern": "^[^\\r\\n]*$" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "decompose": {
+      "type": "object",
+      "properties": {
+        "max_acceptance_criteria": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "adapter": {
+      "type": "object",
+      "required": ["binary"],
+      "properties": {
+        "binary": { "type": "string" },
+        "tested_version_pattern": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "agyAdapter": {
+      "type": "object",
+      "required": ["binary"],
+      "properties": {
+        "binary": { "type": "string" },
+        "tested_version_pattern": { "type": "string" },
+        "print_timeout": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "candidateList": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

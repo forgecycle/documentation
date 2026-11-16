@@ -2,41 +2,17 @@
 title: ForgeCycle
 description: An artifact-driven development loop with four agent roles, immutable handoffs, and Git.
 template: splash
+tableOfContents: false
 hero:
   tagline: Plan with a capable model, build with a fast one, review independently. Every turn is a fresh agent invocation; Markdown handoffs and Git carry the context.
   actions:
     - text: Quick start
       link: /documentation/start/quick-start/
-      icon: right-arrow
     - text: Install
       link: /documentation/start/installing/
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-import release from '../../generated/release.json';
+import Landing from '../../components/Landing.astro';
 
-<CardGrid>
-	<Card title="Four roles" icon="puzzle">
-		Decomposer splits a large plan into a roadmap. Planner plans each task,
-		Builder implements it one commit per turn, and Reviewer decides when it
-		is done. [The loop](/documentation/concepts/the-loop/)
-	</Card>
-	<Card title="Any agent CLI" icon="seti:shell">
-		Route each role to OpenCode, Codex CLI, Claude Code CLI, or `agy`, with
-		ordered fallbacks per policy. [CLI adapters](/documentation/guides/adapters/)
-	</Card>
-	<Card title="Isolated and resumable" icon="random">
-		Each task run works in its own Git worktree. Every stop says why and what
-		to do next. [Recovery](/documentation/guides/recovery/)
-	</Card>
-	<Card title="Observable" icon="laptop">
-		A local dashboard shows every turn, its diff, tests, and findings, on a
-		desktop or a phone. [Dashboard](/documentation/guides/dashboard/)
-	</Card>
-</CardGrid>
-
-<p style="text-align: center; opacity: 0.8">
-	{release.isRelease ? `Documentation for ForgeCycle v${release.version}.` : `Documentation for development build ${release.version}.`}{' '}
-	<a href="https://github.com/forgecycle/forgecycle-releases/releases">Releases</a>
-</p>
+<Landing />

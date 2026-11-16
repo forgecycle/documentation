@@ -1,0 +1,71 @@
+---
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import { sectionIndex, sectionOf } from '../lib/sections';
+
+const { sidebar, entry } = Astro.locals.starlightRoute;
+const section = sectionOf(entry.id);
+const sections = await sectionIndex();
+
+// The top nav picks the section; the sidebar indexes only that section's pages.
+const group = sidebar.find((item) => item.type === 'group' && item.label === section?.label);
+const entries = group && group.type === 'group' ? group.entries : sidebar;
+---
+
+<nav class="switcher md:sl-hidden" aria-label="Sections">
+	<ul>
+		{sections.map((s) => (
+			<li>
+				<a href={s.href} aria-current={s.dir === section?.dir ? 'true' : undefined}>{s.label}</a>
+			</li>
+		))}
+	</ul>
+</nav>
+
+<p class="index-label" aria-hidden="true">Index · {section?.label ?? 'Contents'}</p>
+<SidebarPersister><SidebarSublist sublist={entries} /></SidebarPersister>
+
+<div class="md:sl-hidden"><MobileMenuFooter /></div>
+
+<style>
+	.index-label {
+		margin: 0 0 0.5rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid var(--fc-rule-strong);
+		font-family: var(--fc-font-label);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--fc-ink-text);
+	}
+	.switcher ul {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		margin: 0 0 1.5rem;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--fc-rule-strong);
+		border-inline-start: 1px solid var(--fc-rule-strong);
+	}
+	.switcher li {
+		border-bottom: 1px solid var(--fc-rule-strong);
+		border-inline-end: 1px solid var(--fc-rule-strong);
+	}
+	.switcher a {
+		display: block;
+		padding: 0.625rem 0.75rem;
+		font-family: var(--fc-font-label);
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: var(--fc-ink-text);
+	}
+	.switcher a[aria-current] {
+		background: var(--fc-ink);
+		color: var(--fc-paper);
+	}
+</style>

@@ -1,0 +1,302 @@
+---
+import { sectionIndex } from '../lib/sections';
+
+const sections = await sectionIndex();
+
+const roles = [
+	{
+		code: 'D',
+		name: 'Decomposer',
+		does: 'Assesses a plan too large for one task run and splits it into an ordered roadmap, with the decisions a human must make first.',
+		writes: 'roadmap.md · roadmap.json · decisions.md · tasks/',
+	},
+	{
+		code: 'P',
+		name: 'Planner',
+		does: 'A capable model investigates the repository and plans one task.',
+		writes: 'Plan handoff',
+	},
+	{
+		code: 'B',
+		name: 'Builder',
+		does: 'A faster or cheaper model implements the plan, tests it, and commits one coherent turn. The only role that changes the repository.',
+		writes: 'Exactly one commit',
+	},
+	{
+		code: 'R',
+		name: 'Reviewer',
+		does: 'A capable model reviews the work independently. The only completion authority.',
+		writes: 'Done · changes requested · needs human · blocked',
+	},
+];
+
+const remarks = [
+	{
+		title: 'Any agent CLI',
+		body: 'Route each role to OpenCode, Codex CLI, Claude Code CLI, or agy, with ordered fallbacks per policy.',
+		href: '/documentation/guides/adapters/',
+		link: 'CLI adapters',
+	},
+	{
+		title: 'Isolated and resumable',
+		body: 'Each task run works in its own Git worktree. Every stop says why and what to do next.',
+		href: '/documentation/guides/recovery/',
+		link: 'Recovery',
+	},
+	{
+		title: 'Observable',
+		body: 'A local dashboard shows every turn, its diff, tests, and findings, on a desktop or a phone.',
+		href: '/documentation/guides/dashboard/',
+		link: 'Dashboard',
+	},
+];
+---
+
+<div class="not-content landing">
+<section class="block" aria-labelledby="loop-heading">
+	<div class="block-head">
+		<h2 id="loop-heading">The loop</h2>
+		<p>
+			Every turn is a fresh agent invocation. Immutable Markdown handoffs and Git carry the context
+			between them. <a href="/documentation/concepts/the-loop/">Read the full loop</a>
+		</p>
+	</div>
+	<ol class="log" role="list">
+		{roles.map((r) => (
+			<li class="entry">
+				<span class="code" aria-hidden="true">{r.code}</span>
+				<div class="role">
+					<h3>{r.name}</h3>
+					<p>{r.does}</p>
+				</div>
+				<div class="writes">
+					<span class="label">Leaves</span>
+					<span class="value">{r.writes}</span>
+				</div>
+			</li>
+		))}
+	</ol>
+</section>
+
+<section class="block" aria-labelledby="remarks-heading">
+	<div class="block-head">
+		<h2 id="remarks-heading">Around the loop</h2>
+	</div>
+	<dl class="remarks">
+		{remarks.map((r) => (
+			<div>
+				<dt>{r.title}</dt>
+				<dd>
+					{r.body} <a href={r.href}>{r.link}</a>
+				</dd>
+			</div>
+		))}
+	</dl>
+</section>
+
+<section class="block" aria-labelledby="index-heading">
+	<div class="block-head">
+		<h2 id="index-heading">Index</h2>
+	</div>
+	<div class="index">
+		{sections.map((s) => (
+			<div class="index-col">
+				<h3><a href={s.href}>{s.label}</a></h3>
+				<ul role="list">
+					{s.pages.map((p) => (
+						<li>
+							<a href={p.href}>{p.title}</a>
+							{p.description && <span>{p.description}</span>}
+						</li>
+					))}
+				</ul>
+			</div>
+		))}
+	</div>
+</section>
+</div>
+
+<style>
+	.block {
+		margin-top: 4rem;
+	}
+	.landing a {
+		color: var(--sl-color-text-accent);
+		text-underline-offset: 3px;
+	}
+	.block-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.5rem 2rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 2px solid var(--fc-ink);
+	}
+	.block-head h2 {
+		margin: 0;
+		font-family: var(--fc-font-label);
+		font-size: 2rem;
+		font-weight: 600;
+		line-height: 1;
+		text-transform: uppercase;
+		letter-spacing: 0.01em;
+		color: var(--fc-ink-text);
+	}
+	.block-head p {
+		margin: 0;
+		flex: 1 1 24rem;
+		max-width: 62ch;
+		color: var(--sl-color-gray-2);
+	}
+	.log {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.entry {
+		display: grid;
+		grid-template-columns: 3rem minmax(0, 1fr);
+		gap: 0.25rem 1.25rem;
+		margin: 0;
+		padding-block: 1.25rem;
+		border-bottom: 1px solid var(--fc-rule);
+	}
+	.code {
+		grid-row: span 2;
+		display: grid;
+		place-items: center;
+		width: 3rem;
+		height: 3rem;
+		border: 1px solid var(--fc-ink);
+		font-family: var(--fc-font-label);
+		font-size: 1.75rem;
+		font-weight: 700;
+		color: var(--fc-ink-text);
+	}
+	.entry:nth-child(4) .code {
+		background: var(--fc-ink);
+		color: var(--fc-on-ink);
+	}
+	.role h3 {
+		margin: 0;
+		font-size: var(--sl-text-xl);
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.role p {
+		margin: 0.25rem 0 0;
+		max-width: 62ch;
+	}
+	.writes {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		margin: 0;
+	}
+	.label {
+		font-family: var(--fc-font-label);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--fc-ink-text);
+	}
+	.value {
+		font-family: var(--__sl-font-mono);
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-white);
+	}
+	.remarks {
+		display: grid;
+		margin: 0;
+	}
+	.remarks > div {
+		padding-block: 1.25rem;
+		border-bottom: 1px solid var(--fc-rule);
+	}
+	.remarks dt {
+		font-size: var(--sl-text-lg);
+		font-weight: 700;
+		color: var(--sl-color-white);
+	}
+	.remarks dd {
+		margin: 0.25rem 0 0;
+	}
+	.index {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+	.index-col {
+		padding-block: 1.25rem;
+		border-bottom: 1px solid var(--fc-rule);
+	}
+	.index-col h3 {
+		margin: 0 0 0.75rem;
+		font-family: var(--fc-font-label);
+		font-size: 1.25rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.index-col h3 a {
+		color: var(--fc-ink-text);
+		text-decoration: none;
+	}
+	.index-col ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.index-col li {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		padding-block: 0.5rem;
+	}
+	.index-col li + li {
+		border-top: 1px dotted var(--fc-rule);
+	}
+	.index-col li a {
+		font-weight: 600;
+	}
+	.index-col li span {
+		font-size: var(--sl-text-sm);
+		line-height: 1.5;
+		color: var(--sl-color-gray-3);
+	}
+	@media (min-width: 50em) {
+		.entry {
+			grid-template-columns: 3rem minmax(0, 1fr) 16rem;
+			align-items: start;
+		}
+		.code {
+			grid-row: auto;
+		}
+		.remarks {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			border-bottom: 1px solid var(--fc-rule);
+		}
+		.remarks > div {
+			padding-inline: 1.25rem;
+			border-bottom: 0;
+			border-inline-start: 1px solid var(--fc-rule);
+		}
+		.remarks > div:first-child {
+			padding-inline-start: 0;
+			border-inline-start: 0;
+		}
+		.index {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 2.5rem;
+		}
+	}
+	@media (min-width: 72em) {
+		.index {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			column-gap: 1.5rem;
+		}
+		.index-col {
+			border-bottom: 0;
+		}
+	}
+</style>

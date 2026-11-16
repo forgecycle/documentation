@@ -1,0 +1,156 @@
+---
+import release from '../generated/release.json';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+---
+
+<header class="sheet">
+	<div class="title-cell">
+		<h1 id="_top" data-page-title>{title}</h1>
+		{tagline && <p class="tagline" set:html={tagline} />}
+		{actions.length > 0 && (
+			<div class="actions">
+				{actions.map(({ link, text, variant }) => (
+					<a href={link} class:list={['action', variant === 'minimal' ? 'secondary' : 'primary']}>{text}</a>
+				))}
+			</div>
+		)}
+	</div>
+	<dl class="meta">
+		<div>
+			<dt>Sheet Nº</dt>
+			<dd class="serial">{release.version}</dd>
+		</div>
+		<div>
+			<dt>Build</dt>
+			<dd>{release.isRelease ? 'Release' : 'Development'}</dd>
+		</div>
+		<div>
+			<dt>Start a task</dt>
+			<dd><code>forgecycle task run tasks/my-task.md</code></dd>
+		</div>
+		<div>
+			<dt>Large plan</dt>
+			<dd><code>forgecycle roadmap decompose plans/large-plan.md</code></dd>
+		</div>
+	</dl>
+</header>
+
+<style>
+	.sheet {
+		display: grid;
+		grid-template-columns: 1fr;
+		margin-top: 1rem;
+		border: 1px solid var(--fc-rule-strong);
+		background: var(--fc-sheet);
+	}
+	.title-cell {
+		padding: 1.5rem 1.25rem 2rem;
+	}
+	h1 {
+		margin: 0;
+		font-family: var(--fc-font-label);
+		font-size: clamp(3.5rem, 2rem + 6vw, 6rem);
+		font-weight: 700;
+		line-height: 0.9;
+		letter-spacing: -0.015em;
+		text-transform: uppercase;
+		color: var(--fc-ink-text);
+	}
+	.tagline {
+		margin-top: 1.25rem;
+		max-width: 52ch;
+		font-size: var(--sl-text-lg);
+		line-height: 1.55;
+		color: var(--sl-color-gray-1);
+		text-wrap: pretty;
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 1.75rem;
+	}
+	.action {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding-inline: 1.25rem;
+		border: 1px solid var(--fc-ink);
+		font-family: var(--fc-font-label);
+		font-size: 1.0625rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-decoration: none;
+		transition: background-color 160ms ease-out, color 160ms ease-out;
+	}
+	.primary {
+		background: var(--fc-ink);
+		color: var(--fc-on-ink);
+	}
+	.primary:hover {
+		background: var(--fc-ink-hover);
+		border-color: var(--fc-ink-hover);
+	}
+	.secondary {
+		color: var(--fc-ink-text);
+	}
+	.secondary:hover {
+		background: var(--fc-ink-wash);
+	}
+	.meta {
+		display: grid;
+		margin: 0;
+		border-top: 1px solid var(--fc-rule-strong);
+	}
+	.meta > div {
+		padding: 0.5rem 1.25rem 0.75rem;
+		border-bottom: 1px solid var(--fc-rule);
+	}
+	.meta > div:last-child {
+		border-bottom: 0;
+	}
+	dt {
+		font-family: var(--fc-font-label);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--fc-ink-text);
+	}
+	dd {
+		margin: 0.125rem 0 0;
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+	dd code {
+		font-size: var(--sl-text-sm);
+		font-weight: 500;
+		background: none;
+		padding: 0;
+		overflow-wrap: anywhere;
+	}
+	.serial {
+		font-family: var(--__sl-font-mono);
+		font-size: 2rem;
+		font-weight: 700;
+		line-height: 1.2;
+		color: var(--fc-serial);
+		font-variant-numeric: tabular-nums;
+	}
+	@media (min-width: 50em) {
+		.sheet {
+			grid-template-columns: minmax(0, 1fr) 20rem;
+		}
+		.title-cell {
+			padding: 2.5rem 2rem 2.75rem;
+		}
+		.meta {
+			border-top: 0;
+			border-inline-start: 1px solid var(--fc-rule-strong);
+			align-content: start;
+		}
+	}
+</style>
